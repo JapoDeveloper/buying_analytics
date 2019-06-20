@@ -3,6 +3,7 @@ package co.japo.demo.buying_analytics.service.impl;
 import co.japo.demo.buying_analytics.domain.Product;
 import co.japo.demo.buying_analytics.domain.Transaction;
 import co.japo.demo.buying_analytics.domain.User;
+import co.japo.demo.buying_analytics.kafka.TransactionEvent;
 import co.japo.demo.buying_analytics.service.ProductService;
 import co.japo.demo.buying_analytics.service.TransactionService;
 import co.japo.demo.buying_analytics.service.UserService;
@@ -27,6 +28,18 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void add(Transaction transaction) {
+        this.transactions.add(transaction);
+    }
+
+    @Override
+    public void add(TransactionEvent event) {
+        User tUser = userService.getByName(event.getUser()).orElse(null);
+        Product tProduct = productService.getByName(event.getProduct()).orElse(null);
+        Transaction transaction = Transaction.builder()
+                .user(tUser)
+                .product(tProduct)
+                .buyCount(event.getCount())
+                .build();
         this.transactions.add(transaction);
     }
 
