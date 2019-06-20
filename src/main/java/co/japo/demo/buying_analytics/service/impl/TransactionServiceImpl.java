@@ -8,34 +8,41 @@ import co.japo.demo.buying_analytics.service.TransactionService;
 import co.japo.demo.buying_analytics.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
     private UserService userService;
     private ProductService productService;
+    private List<Transaction> transactions;
 
     public TransactionServiceImpl(UserService userService, ProductService productService) {
         this.userService = userService;
         this.productService = productService;
+        this.transactions = new ArrayList<>();
+    }
+
+    @Override
+    public void add(Transaction transaction) {
+        this.transactions.add(transaction);
+    }
+
+    @Override
+    public Transaction dummyTransaction() {
+        User tUser = userService.getAll().get(new Random().nextInt(userService.getAll().size()));
+        Product tProduct = productService.getAll().get(new Random().nextInt(productService.getAll().size()));
+        return Transaction.builder()
+                .user(tUser)
+                .product(tProduct)
+                .buyCount(new Random().nextInt(10))
+                .build();
     }
 
     @Override
     public List<Transaction> getAll() {
-        return IntStream.range(0, 9)
-                .mapToObj(i -> {
-                    User tUser = userService.getAll().get(new Random().nextInt(userService.getAll().size()));
-                    Product tProduct = productService.getAll().get(new Random().nextInt(productService.getAll().size()));
-                    return Transaction.builder()
-                            .user(tUser)
-                            .product(tProduct)
-                            .buyCount(new Random().nextInt(10))
-                            .build();
-                })
-                .collect(Collectors.toList());
+        return this.transactions;
     }
 }
